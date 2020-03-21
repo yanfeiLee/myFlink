@@ -17,7 +17,7 @@ object MyWaterMark {
   def main(args: Array[String]): Unit = {
     //创建环境
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(1)
+    env.setParallelism(2)
     //设置时间语义为事件时间
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
     //设置watermark周期,默认200ms
@@ -39,21 +39,21 @@ object MyWaterMark {
         element.timestamp * 1000L
       }
     })
-
-
     //watermark没有延时,即数据没有乱序
-    sensorStream.assignAscendingTimestamps(_.timestamp * 1000L)
-
+//    val watermarkStream = sensorStream.assignAscendingTimestamps(_.timestamp * 1000L)
     //自定义watermark
-    sensorStream.assignTimestampsAndWatermarks(new MyPeriodicWaterMarkAssign(1000L))
+//    val watermarkStream = sensorStream.assignTimestampsAndWatermarks(new MyPeriodicWaterMarkAssign(1000L))
 
 
-    val res = watermarkStream.keyBy(1)
+    val res = watermarkStream.keyBy(0)
       .timeWindow(Time.seconds(10)) //开一个10s的滚动窗口
+//      .timeWindow(Time.seconds(10),Time.seconds(5))  //滑动窗口
+
       .reduce(
       (curSensor, newSensor) => {
         SensorReading(curSensor.id, newSensor.timestamp, curSensor.temperature.min(newSensor.temperature))
       })
+//        .minBy(2)  //输出window内同组温度较小的记录
 
     res.print().setParallelism(1)
     //启动
