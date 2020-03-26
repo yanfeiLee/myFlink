@@ -16,7 +16,7 @@ object SinkES {
     val source = env.readTextFile("E:\\Dev\\Code\\idea\\ScalaCode\\myFlink\\flinkTutorial\\src\\main\\resources\\sensor.txt")
 
 
-    source.addSink( )
+//    source.addSink()
 
     //启动
      env.execute("SinkES")
